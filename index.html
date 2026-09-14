@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GALAXAI Community — Minecraft Bedrock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     CONFIG NOTE FOR SERVER OWNER — see bottom of the <script> block
+     for the CONFIG object: server IP/port, admin passcode, shop
+     items, and API endpoints. Edit those, not this CSS.
+     ============================================================ */
+
+  :root{
+    --bg: #10121A;
+    --bg-raised: #171A24;
+    --bg-raised-2: #1D212D;
+    --line: #2A2F3D;
+    --text: #E7E8ED;
+    --text-dim: #8A8F9F;
+    --amber: #E8A23C;
+    --amber-dim: #6B4E22;
+    --teal: #49B8AC;
+    --teal-dim: #1E3B37;
+    --red: #D8654F;
+    --radius: 3px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono{ font-family: 'JetBrains Mono', monospace; }
+
+  a{ color: inherit; text-decoration: none; }
+
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- header ---------- */
+  header{
+    position: sticky; top:0; z-index: 50;
+    background: rgba(16,18,26,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between;
+    height: 64px;
+  }
+  .logo{ display:flex; align-items:baseline; gap:8px; font-weight:700; font-size:1.15rem; letter-spacing:0.02em; }
+  .logo .dot{ color: var(--amber); }
+  nav ul{ list-style:none; display:flex; gap: 28px; }
+  nav a{ color: var(--text-dim); font-size:0.92rem; transition: color .15s; }
+  nav a:hover{ color: var(--text); }
+  .status-pill{
+    display:flex; align-items:center; gap:7px;
+    font-family:'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--text-dim);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 12px;
+  }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background: var(--text-dim); flex-shrink:0; }
+  .status-dot.on{ background: var(--teal); box-shadow: 0 0 6px var(--teal); }
+  .status-dot.off{ background: var(--red); }
+
+  .header-right{ display:flex; align-items:center; gap:14px; }
+  .auth-pill{ display:flex; align-items:center; gap:10px; font-size:0.85rem; }
+  .auth-user{ display:flex; align-items:center; gap:8px; color: var(--text-dim); }
+  .auth-user .name{ color: var(--text); font-weight:600; }
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background: rgba(8,9,13,0.72);
+    align-items:center; justify-content:center; z-index: 100; padding: 20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background: var(--bg-raised); border:1px solid var(--line); border-radius: var(--radius);
+    width: 100%; max-width: 360px; padding: 22px;
+  }
+  .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .modal-head span{ font-weight:700; font-size:1.05rem; }
+  .modal-close{ background:none; border:none; color: var(--text-dim); font-size:1.3rem; cursor:pointer; line-height:1; }
+  .modal-close:hover{ color: var(--text); }
+  .auth-switch{ font-size:0.82rem; color: var(--text-dim); text-align:center; margin-top:4px; cursor:pointer; }
+  .auth-switch b{ color: var(--amber); font-weight:600; }
+
+  .burger{ display:none; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-grid{
+    display:grid; grid-template-columns: 1.3fr 1fr; gap: 48px; align-items:center;
+  }
+  .eyebrow-line{
+    font-family:'JetBrains Mono', monospace; font-size:0.8rem; color: var(--amber);
+    margin-bottom: 18px;
+  }
+  h1{
+    font-size: clamp(2.1rem, 4.2vw, 3.2rem);
+    font-weight: 700; letter-spacing: -0.01em; line-height:1.08;
+    margin-bottom: 20px;
+  }
+  .hero p.lede{
+    color: var(--text-dim); font-size: 1.05rem; max-width: 46ch; margin-bottom: 28px;
+  }
+  .btn-row{ display:flex; gap:12px; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 12px 22px; border-radius: var(--radius);
+    font-weight:600; font-size:0.94rem; cursor:pointer; border:1px solid transparent;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-primary{ background: var(--amber); color:#1B1000; }
+  .btn-primary:hover{ filter: brightness(1.08); }
+  .btn-ghost{ background:transparent; border-color: var(--line); color: var(--text); }
+  .btn-ghost:hover{ border-color:#3d4256; }
+
+  .console{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .console-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 12px 16px; border-bottom:1px solid var(--line);
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem; color: var(--text-dim);
+  }
+  .console-body{ padding: 18px 16px; }
+  .console-row{ display:flex; justify-content:space-between; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size:0.9rem; }
+  .console-row:last-child{ border-bottom:none; }
+  .console-row .k{ color: var(--text-dim); }
+  .console-row .v{ font-family:'JetBrains Mono', monospace; }
+  .console-note{ margin-top:14px; font-size:0.78rem; color: var(--text-dim); line-height:1.5; }
+
+  /* ---------- sections ---------- */
+  section{ padding: 64px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{ margin-bottom: 32px; }
+  .section-head .eyebrow-line{ margin-bottom: 8px; }
+  h2{ font-size: 1.7rem; font-weight:700; margin-bottom:8px; }
+  .section-sub{ color: var(--text-dim); max-width: 60ch; }
+
+  /* ---------- news / log ---------- */
+  .log-entry{
+    display:grid; grid-template-columns: 130px 1fr; gap: 20px;
+    padding: 18px 0; border-top: 1px solid var(--line);
+  }
+  .log-entry:first-child{ border-top:none; }
+  .log-time{ font-family:'JetBrains Mono', monospace; font-size:0.78rem; color: var(--amber); white-space:nowrap; }
+  .log-title-row{ display:flex; align-items:center; gap:9px; margin-bottom:5px; flex-wrap:wrap; }
+  .log-title{ font-weight:600; }
+  .log-body{ color: var(--text-dim); font-size:0.92rem; }
+  .log-empty{ color: var(--text-dim); font-size:0.9rem; padding: 18px 0; }
+  .news-tag{
+    font-family:'JetBrains Mono', monospace; font-size:0.66rem; padding:2px 8px; border-radius:999px;
+    white-space:nowrap;
+  }
+  .news-tag.update{ background: var(--teal-dim); color: var(--teal); }
+  .news-tag.event{ background: var(--amber-dim); color: var(--amber); }
+  .news-tag.maint{ background: #3B2430; color: var(--red); }
+
+  .admin-box{
+    margin-top: 28px; border: 1px dashed var(--line); border-radius: var(--radius);
+    padding: 16px;
+  }
+  .admin-box summary{ cursor:pointer; font-family:'JetBrains Mono', monospace; font-size:0.78rem; color: var(--text-dim); }
+  .admin-form{ margin-top: 14px; display:grid; gap:10px; }
+  input, textarea, select{
+    background: var(--bg-raised-2); border: 1px solid var(--line); color: var(--text);
+    border-radius: var(--radius); padding: 10px 12px; font-family: inherit; font-size: 0.9rem;
+    width: 100%;
+  }
+  textarea{ resize: vertical; min-height: 70px; }
+  input:focus, textarea:focus, select:focus{ outline: 2px solid var(--amber); outline-offset:1px; }
+  .field-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .field-row > *{ flex:1; min-width:140px; }
+  .small-btn{ padding: 9px 16px; font-size:0.85rem; }
+  .form-msg{ font-size:0.8rem; color: var(--teal); font-family:'JetBrains Mono', monospace; min-height: 1.2em; }
+  .form-msg.err{ color: var(--red); }
+
+  /* ---------- shop / inventory ---------- */
+  .tab-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 22px; }
+  .tab-btn{
+    background: var(--bg-raised); border:1px solid var(--line); color: var(--text-dim);
+    border-radius: 999px; padding: 7px 16px; font-size:0.82rem; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; transition: all .15s;
+  }
+  .tab-btn:hover{ color: var(--text); border-color: #3d4256; }
+  .tab-btn.active{ background: var(--amber); color:#1B1000; border-color: var(--amber); font-weight:600; }
+  .inv-grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px;
+  }
+  .inv-slot{
+    background: var(--bg-raised); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .inv-icon{
+    width:100%; aspect-ratio: 1.6; border-radius: var(--radius);
+    background: var(--bg-raised-2); display:flex; align-items:center; justify-content:center;
+    font-size: 1.8rem; overflow:hidden;
+  }
+  .inv-icon img{ width:100%; height:100%; object-fit:cover; }
+  .inv-icon svg{ color: var(--amber); }
+  .inv-name{ font-weight:600; font-size:0.95rem; }
+  .inv-desc{ font-size:0.8rem; color: var(--text-dim); flex:1; }
+  .inv-foot{ display:flex; justify-content:space-between; align-items:center; }
+  .inv-price{ font-family:'JetBrains Mono', monospace; color: var(--amber); font-size:0.9rem; }
+
+  .orders-box{ margin-top: 36px; }
+  .orders-box h3{ font-size:1rem; margin-bottom:14px; }
+  .order-row{
+    display:grid; grid-template-columns: 1fr auto auto; gap:12px; align-items:center;
+    padding: 10px 0; border-top:1px solid var(--line); font-size:0.88rem;
+  }
+  .order-row:first-child{ border-top:none; }
+  .order-status{
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem; padding:3px 9px; border-radius:999px;
+    background: var(--amber-dim); color: var(--amber); white-space:nowrap;
+  }
+
+  /* ---------- character lookup ---------- */
+  .lookup-box{
+    display:grid; grid-template-columns: 1fr auto; gap:10px; max-width: 480px; margin-bottom: 24px;
+  }
+  .player-card{
+    background: var(--bg-raised); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 20px; display:none;
+  }
+  .player-card.show{ display:block; }
+  .player-card-head{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .avatar-block{ width:48px; height:48px; background: var(--teal-dim); border-radius: var(--radius); display:flex; align-items:center; justify-content:center; color: var(--teal); font-weight:700; }
+  .stat-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+  .stat-cell{ background: var(--bg-raised-2); border-radius: var(--radius); padding: 12px; text-align:center; }
+  .stat-cell .num{ font-family:'JetBrains Mono', monospace; font-size:1.2rem; color: var(--amber); }
+  .stat-cell .lab{ font-size:0.72rem; color: var(--text-dim); margin-top:4px; }
+
+  /* ---------- leaderboard ---------- */
+  .lb-row{
+    display:grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items:center;
+    padding: 12px 0; border-top: 1px solid var(--line);
+  }
+  .lb-row:first-child{ border-top:none; }
+  .lb-rank{
+    font-family:'JetBrains Mono', monospace; font-size:0.9rem; color: var(--text-dim); text-align:center;
+  }
+  .lb-row:nth-child(1) .lb-rank{ color: var(--amber); font-weight:700; }
+  .lb-row:nth-child(2) .lb-rank{ color: #C7CBD6; font-weight:700; }
+  .lb-row:nth-child(3) .lb-rank{ color: #C4894F; font-weight:700; }
+  .lb-name{ font-weight:600; font-size:0.92rem; }
+  .lb-score{ font-family:'JetBrains Mono', monospace; font-size:0.85rem; color: var(--teal); }
+  .lb-note{ margin-top:18px; }
+
+  /* ---------- events ---------- */
+  .event-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:14px; }
+  .event-card{ background: var(--bg-raised); border:1px solid var(--line); border-radius: var(--radius); padding:18px; }
+  .event-date{ font-family:'JetBrains Mono', monospace; font-size:0.75rem; color: var(--amber); margin-bottom:10px; }
+  .event-title{ font-weight:600; margin-bottom:6px; }
+  .event-desc{ font-size:0.85rem; color: var(--text-dim); }
+
+  /* ---------- staff ---------- */
+  .staff-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:16px; }
+  .staff-card{ text-align:center; }
+  .staff-avatar{
+    width:64px; height:64px; margin:0 auto 12px; border-radius: var(--radius);
+    background: var(--bg-raised-2); display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; border: 1px solid var(--line);
+  }
+  .staff-name{ font-weight:600; font-size:0.92rem; }
+  .staff-role{ font-family:'JetBrains Mono', monospace; font-size:0.72rem; color: var(--teal); margin-top:3px; }
+
+  /* ---------- rules ---------- */
+  .rules-list{ counter-reset: rule; }
+  .rule-item{
+    display:grid; grid-template-columns: 32px 1fr; gap:14px;
+    padding: 14px 0; border-top:1px solid var(--line);
+  }
+  .rule-item:first-child{ border-top:none; }
+  .rule-num{
+    counter-increment: rule; font-family:'JetBrains Mono', monospace; color: var(--amber); font-size:0.9rem;
+  }
+  .rule-num::before{ content: counter(rule, decimal-leading-zero); }
+  .rule-text{ font-size:0.92rem; }
+  .rule-text b{ color: var(--text); }
+
+  /* ---------- faq ---------- */
+  .faq-item{ border-top:1px solid var(--line); }
+  .faq-item:first-child{ border-top:none; }
+  .faq-item summary{
+    cursor:pointer; padding: 16px 0; font-weight:600; font-size:0.95rem;
+    list-style:none; display:flex; justify-content:space-between; align-items:center;
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{ content:'+'; color: var(--amber); font-size:1.2rem; }
+  .faq-item[open] summary::after{ content:'–'; }
+  .faq-item p{ padding-bottom:16px; color: var(--text-dim); font-size:0.88rem; max-width:65ch; }
+
+  /* ---------- xbox connect ---------- */
+  .connect-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .connect-card{ background: var(--bg-raised); border:1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .connect-card h3{ font-size:1.05rem; margin-bottom:8px; }
+  .connect-card p{ font-size:0.88rem; color: var(--text-dim); margin-bottom:16px; }
+  .linked-list{ margin-top:18px; }
+  .linked-row{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line); font-size:0.85rem; }
+  .linked-row:first-child{ border-top:none; }
+
+  /* ---------- footer ---------- */
+  footer{ padding: 40px 0; }
+  .footer-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color: var(--text-dim); font-size:0.82rem; }
+
+  @media (max-width: 760px){
+    .hero-grid{ grid-template-columns: 1fr; }
+    .connect-grid{ grid-template-columns: 1fr; }
+    nav ul{ display:none; }
+    .log-entry{ grid-template-columns: 1fr; gap:6px; }
+  }
+</style>
+</head>
+<body>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<header>
+  <div class="wrap nav-row">
+    <div class="logo">GALAXAI<span class="dot">.</span></div>
+    <nav>
+      <ul>
+        <li><a href="#news">ข่าวสาร</a></li>
+        <li><a href="#shop">ร้านค้า</a></li>
+        <li><a href="#leaderboard">อันดับ</a></li>
+        <li><a href="#events">กิจกรรม</a></li>
+        <li><a href="#character">ตัวละคร</a></li>
+        <li><a href="#staff">ทีมงาน</a></li>
+        <li><a href="#rules">กฎ</a></li>
+        <li><a href="#xbox">Xbox</a></li>
+      </ul>
+    </nav>
+    <div class="header-right">
+      <div class="status-pill">
+        <span class="status-dot" id="nav-dot"></span>
+        <span id="nav-status-text">กำลังเช็คสถานะ…</span>
+      </div>
+      <div class="auth-pill" id="auth-pill"></div>
+    </div>
+  </div>
+</header>
+
+<div class="modal-overlay" id="auth-overlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span id="auth-title">เข้าสู่ระบบ</span>
+      <button class="modal-close" onclick="closeAuthModal()">×</button>
+    </div>
+    <div class="admin-form">
+      <input type="text" id="auth-username" placeholder="ชื่อผู้ใช้" autocomplete="username">
+      <input type="password" id="auth-password" placeholder="รหัสผ่าน" autocomplete="current-password">
+      <button class="btn btn-primary small-btn" id="auth-submit" onclick="submitAuth()">เข้าสู่ระบบ</button>
+      <div class="form-msg" id="auth-msg"></div>
+      <div class="auth-switch" id="auth-switch" onclick="toggleAuthMode()">ยังไม่มีบัญชี? <b>สมัครสมาชิก</b></div>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow-line">MINECRAFT BEDROCK · SERVER COMMUNITY</div>
+      <h1>ศูนย์กลางของสมาชิก<br>GALAXAI Community</h1>
+      <p class="lede">เช็คสถานะเซิร์ฟเวอร์แบบเรียลไทม์ สั่งไอเทมในเกม ติดตามข่าวสาร และเชื่อมบัญชี Xbox กับตัวละครของคุณ — ทั้งหมดในที่เดียว</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">ไปที่ร้านค้า</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('xbox').scrollIntoView({behavior:'smooth'})">เชื่อมต่อ Xbox</button>
+      </div>
+    </div>
+    <div class="console">
+      <div class="console-head">
+        <span>SERVER.STATUS</span>
+        <span id="console-ip-label" class="mono"></span>
+      </div>
+      <div class="console-body" id="server-console-body">
+        <div class="console-row"><span class="k">สถานะ</span><span class="v" id="stat-state">กำลังเชื่อมต่อ…</span></div>
+        <div class="console-row"><span class="k">ผู้เล่นออนไลน์</span><span class="v" id="stat-players">—</span></div>
+        <div class="console-row"><span class="k">เวอร์ชัน</span><span class="v" id="stat-version">—</span></div>
+        <div class="console-row"><span class="k">MOTD</span><span class="v" id="stat-motd">—</span></div>
+        <div class="console-note">ข้อมูลสถานะดึงผ่านเซิร์ฟเวอร์หลังบ้านของ GALAXAI เพื่อให้หน้าเว็บใช้ API กลางและไม่เก็บคีย์ลับไว้ในเบราว์เซอร์</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="news">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">LOG</div>
+      <h2>ข่าวสาร & ประกาศ</h2>
+      <p class="section-sub">อัปเดตล่าสุดจากทีมงาน เก็บไว้ถาวรและมองเห็นได้ทุกคนที่เข้าเว็บนี้</p>
+    </div>
+    <div id="news-list"></div>
+
+    <details class="admin-box">
+      <summary>สำหรับแอดมิน — เพิ่มประกาศ</summary>
+      <div class="admin-form">
+        <input type="password" id="admin-key" placeholder="รหัสแอดมิน" autocomplete="off">
+        <input type="text" id="news-title" placeholder="หัวข้อประกาศ">
+        <textarea id="news-body" placeholder="รายละเอียด"></textarea>
+        <div class="field-row">
+          <select id="news-tag">
+            <option value="update">อัปเดต</option>
+            <option value="event">กิจกรรม</option>
+            <option value="maint">ปิดปรับปรุง</option>
+          </select>
+          <button class="btn btn-primary small-btn" onclick="addNews()">โพสต์ประกาศ</button>
+        </div>
+        <div class="form-msg" id="news-msg"></div>
+         <button class="btn btn-ghost small-btn" onclick="loadAdminOrders()">รีเฟรชคำสั่งซื้อ</button>
+         <div id="admin-orders"></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="shop">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">STORE</div>
+      <h2>สั่งไอเทมในเกม</h2>
+      <p class="section-sub">เข้าสู่ระบบ เลือกไอเทม ระบุชื่อผู้เล่นในเกม แล้วกดสั่งซื้อ — คำสั่งซื้อจะเข้าคิวรอทีมงานส่งของในเกม</p>
+    </div>
+    <div class="tab-row" id="shop-tabs"></div>
+    <div class="inv-grid" id="shop-grid"></div>
+
+    <div class="orders-box">
+      <h3 class="mono">คำสั่งซื้อของคุณ</h3>
+      <div id="orders-list"></div>
+    </div>
+  </div>
+</section>
+
+<section id="leaderboard">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">RANKING</div>
+      <h2>อันดับผู้เล่น</h2>
+      <p class="section-sub">ตัวอย่างอันดับตามชั่วโมงเล่น — ต่อกับข้อมูลจริงจากปลั๊กอินสถิติของเซิร์ฟเวอร์เพื่อให้อัปเดตอัตโนมัติ</p>
+    </div>
+    <div id="lb-list"></div>
+    <p class="section-sub lb-note mono" style="font-size:0.78rem;">* ข้อมูลตัวอย่างเพื่อสาธิตหน้าตา ยังไม่ได้ดึงจากเซิร์ฟเวอร์จริง</p>
+  </div>
+</section>
+
+<section id="events">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">CALENDAR</div>
+      <h2>กิจกรรมที่กำลังจะมาถึง</h2>
+      <p class="section-sub">อีเวนต์และกิจกรรมพิเศษในเซิร์ฟเวอร์ รายการกิจกรรมถูกส่งจากเซิร์ฟเวอร์หลังบ้าน</p>
+    </div>
+    <div class="event-grid" id="events-grid"></div>
+  </div>
+</section>
+
+<section id="character">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">PLAYER LOOKUP</div>
+      <h2>ดูสถานะตัวละคร</h2>
+      <p class="section-sub">ใส่ชื่อผู้เล่นในเกมเพื่อดูข้อมูล — ต้องเชื่อมกับปลั๊กอิน/API ของเซิร์ฟเวอร์คุณเองจึงจะได้ข้อมูลจริงแบบเรียลไทม์ (ดูหมายเหตุด้านล่าง)</p>
+    </div>
+    <div class="lookup-box">
+      <input type="text" id="player-name" placeholder="ชื่อผู้เล่นในเกม เช่น Steve_TH">
+      <button class="btn btn-primary" onclick="lookupPlayer()">ค้นหา</button>
+    </div>
+    <div class="player-card" id="player-card">
+      <div class="player-card-head">
+        <div class="avatar-block" id="player-avatar">?</div>
+        <div>
+          <div class="log-title" id="player-name-out">—</div>
+          <div class="section-sub mono" id="player-sub" style="font-size:0.8rem">—</div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="num" id="stat-level">—</div><div class="lab">เลเวล</div></div>
+        <div class="stat-cell"><div class="num" id="stat-playtime">—</div><div class="lab">ชั่วโมงเล่น</div></div>
+        <div class="stat-cell"><div class="num" id="stat-balance">—</div><div class="lab">เหรียญในเกม</div></div>
+      </div>
+      <div class="console-note" id="player-note" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</section>
+
+<section id="staff">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">TEAM</div>
+      <h2>ทีมงาน</h2>
+      <p class="section-sub">ผู้ดูแลเซิร์ฟเวอร์และแอดมิน ติดต่อได้หากพบปัญหาหรือมีคนทำผิดกฎ</p>
+    </div>
+    <div class="staff-grid" id="staff-grid"></div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">GUIDELINES</div>
+      <h2>กฎกติกาเซิร์ฟเวอร์</h2>
+      <p class="section-sub">อ่านก่อนเล่น ฝ่าฝืนอาจถูกแบนโดยไม่แจ้งล่วงหน้า</p>
+    </div>
+    <div class="rules-list" id="rules-list"></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">FAQ</div>
+      <h2>คำถามที่พบบ่อย</h2>
+    </div>
+    <div id="faq-list"></div>
+  </div>
+</section>
+
+<section id="xbox">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-line">ACCOUNT LINK</div>
+      <h2>เชื่อมต่อ Xbox / Minecraft Bedrock</h2>
+      <p class="section-sub">เข้าสู่ระบบก่อน แล้วผูก Gamertag ของคุณเข้ากับชื่อผู้เล่นในเกม เพื่อให้ระบบร้านค้าและสถานะตัวละครรู้จักคุณ</p>
+    </div>
+    <div class="connect-grid">
+      <div class="connect-card">
+        <h3>ผูกบัญชี</h3>
+        <p>กรอก Gamertag และชื่อผู้เล่นในเกม (Bedrock ใช้ Gamertag เดียวกับ Xbox โดยตรงอยู่แล้ว)</p>
+        <div class="admin-form">
+          <input type="text" id="xbox-gamertag" placeholder="Xbox Gamertag">
+          <input type="text" id="xbox-igname" placeholder="ชื่อผู้เล่นในเกม">
+          <button class="btn btn-primary small-btn" onclick="linkXbox()">บันทึกการเชื่อมต่อ</button>
+          <div class="form-msg" id="xbox-msg"></div>
+        </div>
+        <div class="linked-list" id="linked-list"></div>
+      </div>
+      <div class="connect-card">
+        <h3>เข้าสู่ระบบด้วย Xbox Live (OAuth)</h3>
+        <p>ส่วนนี้ต้องตั้งค่า Microsoft OAuth เพิ่มแยกต่างหาก หากต้องการตรวจสอบตัวตน Xbox แบบเป็นทางการ</p>
+        <button class="btn btn-ghost" disabled style="opacity:.5; cursor:not-allowed;">เข้าสู่ระบบด้วย Xbox (ต้องตั้งค่าเพิ่ม)</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>GALAXAI Community — Minecraft Bedrock Server</span>
+    <span class="mono" id="footer-ip">—</span>
+  </div>
+</footer>
+
+
+<script src="/app.js" defer></script>
+</body>
+</html>
